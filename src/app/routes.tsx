@@ -16,6 +16,4 @@ export const router = createBrowserRouter([
       { path: "admin/leads", Component: AdminLeads },
     ],
   },
-], {
-  basename: "/b2bsaasadvisor",
-});
+]);

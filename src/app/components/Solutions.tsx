@@ -1,24 +1,46 @@
 const solutions = [
   {
     num: "01",
-    title: "Найти точку ограничения роста",
-    desc: "Системный анализ воронки, метрик и процессов. Не гипотезы — диагностика.",
+    title: "Продажи и CRM",
+    desc: "Квалификация и распределение лидов, мгновенный первый ответ, напоминания, автоматические КП и счета.",
   },
   {
     num: "02",
-    title: "Перестроить онбординг и монетизацию",
-    desc: "Реинжиниринг CJM, тарифной логики и механик активации.",
+    title: "Заявки и заказы",
+    desc: "Приём заказов из почты и мессенджеров, автоматическое создание в 1С или ERP, статусы для клиента без звонков менеджеру.",
   },
   {
     num: "03",
-    title: "Выстроить продуктовую систему",
-    desc: "Процессы, приоритизация, юнит-экономика — всё, что позволяет масштабироваться без хаоса.",
+    title: "Документы и финансы",
+    desc: "Счета, акты, сверки, ЭДО, проверки контрагентов и комплаенс — без ручного копирования.",
   },
   {
     num: "04",
-    title: "Приоритизировать инициативы по ROI",
-    desc: "Финансовый вес каждого решения. Только то, что двигает ключевые метрики.",
+    title: "Поддержка клиентов",
+    desc: "AI-ассистент первой линии на базе знаний компании, маршрутизация обращений, контроль SLA.",
   },
+  {
+    num: "05",
+    title: "Онбординг и найм",
+    desc: "Подключение клиентов и сотрудников: анкеты, скоринг, Telegram-боты для массового найма.",
+  },
+  {
+    num: "06",
+    title: "Отчётность",
+    desc: "Сквозные дашборды и ежедневная сводка собственнику вместо сборки Excel по пятницам.",
+  },
+];
+
+const stack = [
+  "n8n",
+  "Make",
+  "amoCRM",
+  "Битрикс24",
+  "1С",
+  "Telegram",
+  "ЭДО",
+  "LLM-агенты",
+  "RAG",
 ];
 
 export function Solutions() {
@@ -38,7 +60,7 @@ export function Solutions() {
                 color: "#0F2356",
               }}
             >
-              Что я делаю
+              Что я автоматизирую
             </span>
           </div>
           <div className="col-span-12 lg:col-span-8 mt-6">
@@ -52,10 +74,24 @@ export function Solutions() {
                 lineHeight: "1.1",
               }}
             >
-              Помогаю B2B SaaS-компаниям
+              Убираю ручную работу там,
               <br />
-              расти системно
+              где она стоит дороже всего
             </h2>
+            <p
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 400,
+                fontSize: "clamp(15px, 1.3vw, 18px)",
+                color: "#3a3a3a",
+                lineHeight: "1.6",
+                maxWidth: "620px",
+                marginTop: "24px",
+              }}
+            >
+              Я не интегратор, который продаёт инструменты. Я продакт: сначала
+              считаю, где автоматизация даст деньги, и только потом внедряю.
+            </p>
           </div>
         </div>
 
@@ -64,7 +100,7 @@ export function Solutions() {
           {solutions.map((s) => (
             <div
               key={s.num}
-              className="col-span-12 sm:col-span-6 lg:col-span-3 p-8"
+              className="col-span-12 sm:col-span-6 lg:col-span-4 p-8"
               style={{
                 background: "#ffffff",
                 border: "1px solid rgba(0,0,0,0.06)",
@@ -108,6 +144,39 @@ export function Solutions() {
                 {s.desc}
               </p>
             </div>
+          ))}
+        </div>
+
+        {/* Stack */}
+        <div className="mt-14 flex flex-wrap items-center gap-3">
+          <span
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 400,
+              fontSize: "11px",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "#717182",
+              marginRight: "8px",
+            }}
+          >
+            Инструменты под задачу
+          </span>
+          {stack.map((tool) => (
+            <span
+              key={tool}
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 500,
+                fontSize: "13px",
+                color: "#0a0a0a",
+                background: "#ffffff",
+                border: "1px solid rgba(0,0,0,0.08)",
+                padding: "6px 12px",
+              }}
+            >
+              {tool}
+            </span>
           ))}
         </div>
       </div>

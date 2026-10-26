@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router";
 import { useModal } from "../context/ModalContext";
+import { normalizePath } from "../seo";
 
 export function Nav() {
   const { openModal } = useModal();
@@ -9,11 +10,15 @@ export function Nav() {
 
   const navLinks = [
     { label: "Кейсы", to: "/#cases" },
-    { label: "Подход", to: "/philosophy" },
-    { label: "Масштаб", to: "/scale" },
+    { label: "Блог", to: "/blog/" },
+    { label: "Подход", to: "/philosophy/" },
+    { label: "Масштаб", to: "/scale/" },
   ];
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) =>
+    path === "/blog/"
+      ? normalizePath(location.pathname).startsWith(path)
+      : normalizePath(location.pathname) === path;
 
   return (
     <nav

@@ -6,6 +6,7 @@ import { Formats } from "../components/Formats";
 import { Process } from "../components/Process";
 import { NotFor } from "../components/NotFor";
 import { CTA } from "../components/CTA";
+import { BlogTeaser } from "../components/BlogTeaser";
 
 export function Home() {
   return (
@@ -17,6 +18,7 @@ export function Home() {
       <Formats />
       <Process />
       <NotFor />
+      <BlogTeaser />
       <CTA />
     </>
   );

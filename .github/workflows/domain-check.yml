@@ -1,0 +1,60 @@
+name: Domain diagnostics
+
+on:
+  push:
+    branches:
+      - claude/modest-ritchie-l11wnt
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install tools
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq whois dnsutils >/dev/null
+
+      - name: WHOIS
+        run: whois productmike.ru | grep -iE 'domain|nserver|state|registrar|paid-till|free-date|created' || true
+
+      - name: Delegation from .ru registry
+        run: dig +norecurse NS productmike.ru @a.dns.ripn.net || true
+
+      - name: Public resolvers
+        run: |
+          for r in 8.8.8.8 1.1.1.1 77.88.8.8; do
+            echo "===== resolver $r"
+            for q in "NS productmike.ru" "A productmike.ru" "AAAA productmike.ru" "CNAME www.productmike.ru" "A www.productmike.ru" "TXT _github-pages-challenge-MikeProduct14.productmike.ru" "CAA productmike.ru"; do
+              echo "--- $q"; dig +short $q @$r || true
+            done
+          done
+
+      - name: Authoritative Beget servers
+        run: |
+          for ns in ns1.beget.com ns2.beget.com; do
+            echo "===== $ns"
+            for q in "A productmike.ru" "CNAME www.productmike.ru" "A www.productmike.ru" "TXT _github-pages-challenge-MikeProduct14.productmike.ru"; do
+              echo "--- $q"; dig +short $q @$ns || true
+            done
+          done
+
+      - name: HTTP / HTTPS
+        run: |
+          for u in http://productmike.ru/ https://productmike.ru/ http://www.productmike.ru/ https://www.productmike.ru/ https://mikeproduct14.github.io/ https://mikeproduct14.github.io/b2bsaasadvisor/; do
+            echo "===== $u"
+            curl -sS -m 20 -o /dev/null -L -w 'code=%{http_code} final=%{url_effective} ip=%{remote_ip}\n' "$u" || true
+          done
+          echo "===== TLS cert www.productmike.ru"
+          echo | timeout 15 openssl s_client -connect www.productmike.ru:443 -servername www.productmike.ru 2>/dev/null | openssl x509 -noout -subject -issuer -dates -ext subjectAltName || true
+          echo "===== TLS cert productmike.ru"
+          echo | timeout 15 openssl s_client -connect productmike.ru:443 -servername productmike.ru 2>/dev/null | openssl x509 -noout -subject -issuer -dates -ext subjectAltName || true
+
+      - name: GitHub Pages settings
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/${{ github.repository }}/pages || true
+          gh api repos/${{ github.repository }}/pages/health || true

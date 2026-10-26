@@ -17,29 +17,21 @@ jobs:
       - name: Install tools
         run: sudo apt-get update -qq && sudo apt-get install -y -qq whois dnsutils >/dev/null
 
-      - name: WHOIS
-        run: whois productmike.ru | grep -iE 'domain|nserver|state|registrar|paid-till|free-date|created' || true
-
-      - name: Delegation from .ru registry
-        run: dig +norecurse NS productmike.ru @a.dns.ripn.net || true
-
-      - name: Public resolvers
+      - name: What productmike.ru serves
         run: |
-          for r in 8.8.8.8 1.1.1.1 77.88.8.8; do
-            echo "===== resolver $r"
-            for q in "NS productmike.ru" "A productmike.ru" "AAAA productmike.ru" "CNAME www.productmike.ru" "A www.productmike.ru" "TXT _github-pages-challenge-MikeProduct14.productmike.ru" "CAA productmike.ru"; do
-              echo "--- $q"; dig +short $q @$r || true
-            done
-          done
-
-      - name: Authoritative Beget servers
-        run: |
-          for ns in ns1.beget.com ns2.beget.com; do
-            echo "===== $ns"
-            for q in "A productmike.ru" "CNAME www.productmike.ru" "A www.productmike.ru" "TXT _github-pages-challenge-MikeProduct14.productmike.ru"; do
-              echo "--- $q"; dig +short $q @$ns || true
-            done
-          done
+          echo "===== headers"
+          curl -sS -m 20 -D - -o page.html https://productmike.ru/ || true
+          echo "===== title / meta / first text"
+          grep -ioE '<title>[^<]*</title>|<meta[^>]+(description|generator)[^>]*>' page.html | head -20 || true
+          echo "===== head of body (first 3000 chars, tags stripped)"
+          sed -e 's/<script[^>]*>.*<\/script>//g' -e 's/<[^>]*>/ /g' page.html | tr -s ' \n' | head -c 3000; echo
+          echo "===== links"
+          grep -oE 'href="[^"]+"|src="[^"]+"' page.html | sort -u | head -40 || true
+          echo "===== IP owner 95.163.244.138"
+          dig +short -x 95.163.244.138 || true
+          whois 95.163.244.138 | grep -iE 'netname|descr|org-name|organisation|country|role' | head -15 || true
+          echo "===== full whois (registrant fields)"
+          whois productmike.ru || true
 
       - name: HTTP / HTTPS
         run: |

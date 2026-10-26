@@ -28,20 +28,29 @@ jobs:
             done
           done
 
+      - name: Every REG.RU nameserver address
+        run: |
+          for ip in $(dig +short A ns1.reg.ru; dig +short A ns2.reg.ru); do
+            printf '%-16s www: %s | apex: %s | serial: %s\n' "$ip" \
+              "$(dig +short +norecurse +time=3 +tries=1 www.productmike.ru A @$ip | tr '\n' ' ')" \
+              "$(dig +short +norecurse +time=3 +tries=1 productmike.ru A @$ip | tr '\n' ' ')" \
+              "$(dig +short +norecurse +time=3 +tries=1 productmike.ru SOA @$ip | awk '{print $3}')"
+          done
+          for ip in $(dig +short AAAA ns1.reg.ru; dig +short AAAA ns2.reg.ru); do
+            printf '%-20s www: %s\n' "$ip" "$(dig +short +norecurse +time=3 +tries=1 www.productmike.ru A @$ip | tr '\n' ' ')"
+          done
+
       - name: Public resolvers (with TTL)
         run: |
-          for r in 8.8.8.8 1.1.1.1 77.88.8.8 9.9.9.9; do
-            echo "===== resolver $r"
-            for q in "A productmike.ru" "A www.productmike.ru" "CNAME www.productmike.ru"; do
-              echo "--- $q"; dig +noall +answer $q @$r || true
-            done
+          for r in 8.8.8.8 8.8.4.4 1.1.1.1 1.0.0.1 77.88.8.8 9.9.9.9 208.67.222.222 94.140.14.14; do
+            echo "===== $r: $(dig +noall +answer +time=3 +tries=1 www.productmike.ru A @$r | tr -s '\t' ' ' | tr '\n' ';')"
           done
 
       - name: HTTP / HTTPS
         run: |
           for u in http://productmike.ru/ https://productmike.ru/ http://www.productmike.ru/ https://www.productmike.ru/ https://mikeproduct14.github.io/b2bsaasadvisor/; do
             echo "===== $u"
-            curl -sS -m 20 -o /dev/null -w 'first-hop code=%{http_code} redirect=%{redirect_url}\n' "$u" || true
+            curl -sS -m 20 -o /dev/null -D - -w 'first-hop code=%{http_code} redirect=%{redirect_url}\n' "$u" | grep -iE 'strict-transport|first-hop|^location' || true
             curl -sS -m 20 -L -o page.html -w 'code=%{http_code} final=%{url_effective} ip=%{remote_ip}\n' "$u" || true
             grep -ioE '<title>[^<]*</title>' page.html | head -1 || true
           done

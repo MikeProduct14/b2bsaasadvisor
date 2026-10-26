@@ -1,0 +1,54 @@
+name: Domain diagnostics
+
+on:
+  push:
+    branches:
+      - claude/modest-ritchie-l11wnt
+
+permissions:
+  contents: read
+  pages: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install tools
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq whois dnsutils >/dev/null
+
+      - name: Delegation
+        run: whois productmike.ru | grep -iE 'nserver|state' || true
+
+      - name: Authoritative REG.RU servers
+        run: |
+          for ns in ns1.reg.ru ns2.reg.ru; do
+            echo "===== $ns"
+            for q in "A productmike.ru" "AAAA productmike.ru" "ANY www.productmike.ru" "A www.productmike.ru" "CNAME www.productmike.ru"; do
+              echo "--- $q"; dig +noall +answer +authority $q @$ns || true
+            done
+          done
+
+      - name: Public resolvers (with TTL)
+        run: |
+          for r in 8.8.8.8 1.1.1.1 77.88.8.8 9.9.9.9; do
+            echo "===== resolver $r"
+            for q in "A productmike.ru" "A www.productmike.ru" "CNAME www.productmike.ru"; do
+              echo "--- $q"; dig +noall +answer $q @$r || true
+            done
+          done
+
+      - name: HTTP / HTTPS
+        run: |
+          for u in http://productmike.ru/ https://productmike.ru/ http://www.productmike.ru/ https://www.productmike.ru/ https://mikeproduct14.github.io/b2bsaasadvisor/; do
+            echo "===== $u"
+            curl -sS -m 20 -o /dev/null -w 'first-hop code=%{http_code} redirect=%{redirect_url}\n' "$u" || true
+            curl -sS -m 20 -L -o page.html -w 'code=%{http_code} final=%{url_effective} ip=%{remote_ip}\n' "$u" || true
+            grep -ioE '<title>[^<]*</title>' page.html | head -1 || true
+          done
+          echo "===== TLS cert www.productmike.ru"
+          echo | timeout 15 openssl s_client -connect www.productmike.ru:443 -servername www.productmike.ru 2>/dev/null | openssl x509 -noout -subject -issuer -dates -ext subjectAltName || true
+
+      - name: GitHub Pages settings
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api repos/${{ github.repository }}/pages || true

@@ -14,7 +14,7 @@ export function Footer() {
             color: "#ffffff",
           }}
         >
-          B2B SaaS Advisor
+          ProductMike
         </span>
         <span
           style={{
@@ -24,7 +24,7 @@ export function Footer() {
             color: "#717182",
           }}
         >
-          © 2026 · Продуктовый консалтинг для B2B SaaS
+          © 2026 · Автоматизация бизнес-процессов
         </span>
       </div>
     </footer>

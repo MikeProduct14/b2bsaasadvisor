@@ -23,7 +23,7 @@ export function Hero() {
                 color: "#0F2356",
               }}
             >
-              B2B SaaS · Product Consulting
+              Автоматизация бизнеса · AI · Интеграции
             </div>
 
             {/* Headline */}
@@ -38,20 +38,20 @@ export function Hero() {
                 marginBottom: "40px",
               }}
             >
-              Убираю системные
+              Автоматизирую
               <br />
-              ограничения роста
+              рутину, которая
               <br />
-              <span style={{ color: "#0F2356" }}>в B2B SaaS</span>
+              <span style={{ color: "#0F2356" }}>тормозит рост</span>
             </h1>
 
             {/* Stats row */}
             <div className="flex flex-wrap gap-x-12 gap-y-6 mb-14">
               {[
                 { value: "11+", label: "лет в продукте" },
+                { value: "−70%", label: "ручной обработки заявок" },
                 { value: "500", label: "подключений в сутки" },
-                { value: "+113%", label: "рост ARPU" },
-                { value: "3 млрд ₽", label: "ARR продуктов" },
+                { value: "6 ч", label: "онбординг вместо 5 дней" },
               ].map((stat) => (
                 <div key={stat.label}>
                   <div
@@ -89,13 +89,13 @@ export function Hero() {
                 fontSize: "clamp(16px, 1.5vw, 20px)",
                 color: "#3a3a3a",
                 lineHeight: "1.6",
-                maxWidth: "540px",
+                maxWidth: "600px",
                 marginBottom: "48px",
               }}
             >
-              Если рост замедлился — проблема почти всегда
-              <br className="hidden md:block" />
-              в системе, а не в фичах.
+              Нахожу процессы, где ручная работа съедает деньги и время
+              команды, и заменяю их системой: интеграции, AI-агенты, сквозная
+              автоматизация. С расчётом ROI до старта.
             </p>
 
             {/* CTA Button */}
@@ -123,7 +123,7 @@ export function Hero() {
                   "#0F2356")
               }
             >
-              Записаться на диагностический созвон →
+              Записаться на разбор процессов →
             </button>
           </div>
         </div>

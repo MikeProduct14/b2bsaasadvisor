@@ -8,7 +8,8 @@ export function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navLinks = [
-    { label: "Philosophy", to: "/philosophy" },
+    { label: "Кейсы", to: "/#cases" },
+    { label: "Подход", to: "/philosophy" },
     { label: "Масштаб", to: "/scale" },
   ];
 
@@ -32,7 +33,7 @@ export function Nav() {
             textDecoration: "none",
           }}
         >
-          B2B SaaS Advisor
+          ProductMike
         </Link>
 
         {/* Desktop nav */}

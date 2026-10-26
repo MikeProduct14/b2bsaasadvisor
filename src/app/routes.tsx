@@ -1,11 +1,14 @@
-import { createBrowserRouter } from "react-router";
+import type { RouteObject } from "react-router";
 import { Root } from "./components/Root";
 import { Home } from "./pages/Home";
 import { ProductPhilosophy } from "./pages/ProductPhilosophy";
 import { ManagementScale } from "./pages/ManagementScale";
+import { Blog } from "./pages/Blog";
+import { BlogPost, blogPostLoader } from "./pages/BlogPost";
 import AdminLeads from "./pages/AdminLeads";
 
-export const router = createBrowserRouter([
+// Shared by the browser router (App.tsx) and the build-time prerender (entry-server.tsx).
+export const routes: RouteObject[] = [
   {
     path: "/",
     Component: Root,
@@ -13,7 +16,14 @@ export const router = createBrowserRouter([
       { index: true, Component: Home },
       { path: "philosophy", Component: ProductPhilosophy },
       { path: "scale", Component: ManagementScale },
+      { path: "blog", Component: Blog },
+      {
+        path: "blog/:slug",
+        Component: BlogPost,
+        loader: blogPostLoader,
+        HydrateFallback: () => null,
+      },
       { path: "admin/leads", Component: AdminLeads },
     ],
   },
-]);
+];

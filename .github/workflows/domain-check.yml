@@ -1,4 +1,3 @@
-# re-run 2026-10-26T12:55Z
 name: Domain diagnostics
 
 on:
@@ -14,51 +13,39 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Install tools
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq whois dnsutils >/dev/null
-
-      - name: Delegation
-        run: whois productmike.ru | grep -iE 'nserver|state' || true
-
-      - name: Authoritative REG.RU servers
-        run: |
-          for ns in ns1.reg.ru ns2.reg.ru; do
-            echo "===== $ns"
-            for q in "A productmike.ru" "AAAA productmike.ru" "ANY www.productmike.ru" "A www.productmike.ru" "CNAME www.productmike.ru"; do
-              echo "--- $q"; dig +noall +answer +authority $q @$ns || true
-            done
-          done
-
-      - name: Every REG.RU nameserver address
-        run: |
-          for ip in $(dig +short A ns1.reg.ru; dig +short A ns2.reg.ru); do
-            printf '%-16s www: %s | apex: %s | serial: %s\n' "$ip" \
-              "$(dig +short +norecurse +time=3 +tries=1 www.productmike.ru A @$ip | tr '\n' ' ')" \
-              "$(dig +short +norecurse +time=3 +tries=1 productmike.ru A @$ip | tr '\n' ' ')" \
-              "$(dig +short +norecurse +time=3 +tries=1 productmike.ru SOA @$ip | awk '{print $3}')"
-          done
-          for ip in $(dig +short AAAA ns1.reg.ru; dig +short AAAA ns2.reg.ru); do
-            printf '%-20s www: %s\n' "$ip" "$(dig +short +norecurse +time=3 +tries=1 www.productmike.ru A @$ip | tr '\n' ' ')"
-          done
-
-      - name: Public resolvers (with TTL)
-        run: |
-          for r in 8.8.8.8 8.8.4.4 1.1.1.1 1.0.0.1 77.88.8.8 9.9.9.9 208.67.222.222 94.140.14.14; do
-            echo "===== $r: $(dig +noall +answer +time=3 +tries=1 www.productmike.ru A @$r | tr -s '\t' ' ' | tr '\n' ';')"
-          done
-
-      - name: HTTP / HTTPS
-        run: |
-          for u in http://productmike.ru/ https://productmike.ru/ http://www.productmike.ru/ https://www.productmike.ru/ https://mikeproduct14.github.io/b2bsaasadvisor/; do
-            echo "===== $u"
-            curl -sS -m 20 -o /dev/null -D - -w 'first-hop code=%{http_code} redirect=%{redirect_url}\n' "$u" | grep -iE 'strict-transport|first-hop|^location' || true
-            curl -sS -m 20 -L -o page.html -w 'code=%{http_code} final=%{url_effective} ip=%{remote_ip}\n' "$u" || true
-            grep -ioE '<title>[^<]*</title>' page.html | head -1 || true
-          done
-          echo "===== TLS cert www.productmike.ru"
-          echo | timeout 15 openssl s_client -connect www.productmike.ru:443 -servername www.productmike.ru 2>/dev/null | openssl x509 -noout -subject -issuer -dates -ext subjectAltName || true
-
       - name: GitHub Pages settings
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh api repos/${{ github.repository }}/pages || true
+
+      - name: Install github-pages-health-check
+        run: sudo gem install --no-document github-pages-health-check 2>&1 | tail -3
+
+      - name: Run GitHub's own DNS health check
+        run: |
+          cat > check.rb <<'RUBY'
+          require "github-pages-health-check"
+          require "json"
+          puts "gem version: #{GitHubPages::HealthCheck::VERSION}"
+          %w[www.productmike.ru productmike.ru].each do |host|
+            %i[default authoritative public].each do |ns|
+              begin
+                d = GitHubPages::HealthCheck::Domain.new(host, nameservers: ns)
+                h = d.to_hash
+                puts "===== #{host} (nameservers: #{ns})"
+                puts "valid?=#{d.valid?} reason=#{d.reason.class}: #{d.reason&.message}"
+                puts "dns=" + (d.dns || []).map { |r| "#{r.type} #{r.respond_to?(:address) ? r.address : (r.respond_to?(:cname) ? r.cname : r.rdata)}" }.join(", ")
+                puts JSON.pretty_generate(h.select { |k, _| %i[a_record? cname_record? valid_domain? apex_domain? should_be_a_record? cname_to_github_user_domain? pointed_to_github_pages_ip? non_github_pages_ip_present? enforces_https? https? https_error dns_resolves? proxied? cloudflare_ip? old_ip_address? mx_records_present? valid_domain? cname].include?(k) })
+              rescue => e
+                puts "===== #{host} (nameservers: #{ns}) ERROR #{e.class}: #{e.message}"
+              end
+            end
+          end
+          RUBY
+          ruby check.rb
+
+      - name: TLS cert
+        run: |
+          echo | timeout 15 openssl s_client -connect www.productmike.ru:443 -servername www.productmike.ru 2>/dev/null | openssl x509 -noout -subject -dates || true
+          dig +noall +answer www.productmike.ru A @8.8.8.8
+          dig +noall +answer productmike.ru A @8.8.8.8

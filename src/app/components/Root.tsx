@@ -4,6 +4,7 @@ import { Nav } from "./Nav";
 import { Footer } from "./Footer";
 import { ContactModal } from "./ContactModal";
 import { ModalProvider } from "../context/ModalContext";
+import { applyHead, getHead } from "../seo";
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -14,6 +15,9 @@ function ScrollToTop() {
     }
     window.scrollTo(0, 0);
   }, [pathname, hash]);
+  useEffect(() => {
+    applyHead(getHead(pathname));
+  }, [pathname]);
   return null;
 }
 

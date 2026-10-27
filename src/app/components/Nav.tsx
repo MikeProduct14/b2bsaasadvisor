@@ -10,6 +10,7 @@ export function Nav() {
 
   const navLinks = [
     { label: "Кейсы", to: "/#cases" },
+    { label: "Продукты", to: "/products/" },
     { label: "Блог", to: "/blog/" },
     { label: "Подход", to: "/philosophy/" },
     { label: "Масштаб", to: "/scale/" },

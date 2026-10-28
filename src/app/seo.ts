@@ -1,4 +1,5 @@
 import { getPost, posts, postPath } from "./blog/posts";
+import { products } from "./products";
 import { AUTHOR, SITE_NAME, SITE_URL } from "./site";
 
 export interface Head {
@@ -160,6 +161,34 @@ export function getHead(pathname: string): Head {
       path,
       type: "website",
       jsonLd: [],
+    };
+  }
+
+  if (path === "/products/") {
+    return {
+      title: withBrand("Продукты: что я собрал сам"),
+      description:
+        "Каталог моделей и SEO-воронки для MoleculAI, MVP по 115-ФЗ для МФО, курс по A/B-тестам, Luno и Roadmap App — с честным статусом каждого.",
+      path,
+      type: "website",
+      jsonLd: [
+        {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "Продукты ProductMike",
+          itemListElement: products.map((product, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            name: product.name,
+            description: product.summary,
+            url: `${SITE_URL}/products/#${product.slug}`,
+          })),
+        },
+        breadcrumbs([
+          { name: "Главная", path: "/" },
+          { name: "Продукты", path: "/products/" },
+        ]),
+      ],
     };
   }
 

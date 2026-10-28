@@ -3,6 +3,7 @@ import { Root } from "./components/Root";
 import { Home } from "./pages/Home";
 import { ProductPhilosophy } from "./pages/ProductPhilosophy";
 import { ManagementScale } from "./pages/ManagementScale";
+import { Products } from "./pages/Products";
 import { Blog } from "./pages/Blog";
 import { BlogPost, blogPostLoader } from "./pages/BlogPost";
 import AdminLeads from "./pages/AdminLeads";
@@ -16,6 +17,7 @@ export const routes: RouteObject[] = [
       { index: true, Component: Home },
       { path: "philosophy", Component: ProductPhilosophy },
       { path: "scale", Component: ManagementScale },
+      { path: "products", Component: Products },
       { path: "blog", Component: Blog },
       {
         path: "blog/:slug",

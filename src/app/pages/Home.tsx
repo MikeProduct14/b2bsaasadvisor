@@ -2,6 +2,7 @@ import { Hero } from "../components/Hero";
 import { Problems } from "../components/Problems";
 import { Solutions } from "../components/Solutions";
 import { Cases } from "../components/Cases";
+import { ProductsTeaser } from "../components/ProductsTeaser";
 import { Formats } from "../components/Formats";
 import { Process } from "../components/Process";
 import { NotFor } from "../components/NotFor";
@@ -15,6 +16,7 @@ export function Home() {
       <Problems />
       <Solutions />
       <Cases />
+      <ProductsTeaser />
       <Formats />
       <Process />
       <NotFor />

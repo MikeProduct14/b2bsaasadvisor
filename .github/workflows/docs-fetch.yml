@@ -7,17 +7,20 @@ jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch Wordstat API docs
+      - name: Fetch Yandex Search API Wordstat docs
         run: |
-          for u in \
-            https://yandex.ru/support2/wordstat/ru/content/api-structure.md \
-            https://yandex.ru/support2/wordstat/ru/content/api-wordstat.md \
-            https://yandex.com/support2/wordstat/en/content/api-structure.md \
-            https://yandex.com/support2/wordstat/en/content/api-wordstat.md; do
-            echo "===== $u"
-            curl -sSL --max-time 30 -A "Mozilla/5.0" "$u" | head -c 60000
+          get() {
+            echo "===== $1"
+            body="$(curl -sSL --max-time 30 -A "Mozilla/5.0" "$1" || true)"
+            if printf '%s' "$body" | head -c 200 | grep -qi '<!doctype html\|<html'; then
+              printf '%s' "$body" | python3 -c "import sys,re,html; t=sys.stdin.read(); t=re.sub(r'(?s)<(script|style)[^>]*>.*?</\1>',' ',t); t=re.sub(r'<[^>]+>','\n',t); t=html.unescape(t); t=re.sub(r'\n\s*\n+','\n',t); print(t[:20000])"
+            else
+              printf '%s' "$body" | head -c 30000
+            fi
             echo
+          }
+          for p in concepts/wordstat operations/wordstat-gettop api-ref/Wordstat/getTop pricing concepts/limits; do
+            get "https://yandex.cloud/ru/docs/search-api/$p.md"
           done
-      - name: Probe API endpoint
-        run: |
-          curl -sS -i --max-time 20 -X POST https://api.wordstat.yandex.net/v1/topRequests -H 'Content-Type: application/json' -d '{"phrase":"финтех"}' | head -30 || true
+          get "https://aistudio.yandex.ru/docs/ru/search-api/concepts/wordstat.html"
+          get "https://aistudio.yandex.ru/docs/ru/search-api/pricing.html"

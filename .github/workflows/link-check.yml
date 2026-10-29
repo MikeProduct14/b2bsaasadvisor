@@ -1,0 +1,32 @@
+name: Link check (temporary)
+
+on:
+  push:
+    branches:
+      - claude/modest-ritchie-l11wnt
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: A/B course page
+        run: |
+          u=https://ab-praktika-course.spunkygiant7.chatgpt.site/
+          curl -sS -m 30 -L -o page.html -w 'code=%{http_code} final=%{url_effective}\n' "$u" || true
+          grep -ioE '<title>[^<]*</title>|<meta[^>]+description[^>]*>' page.html | head -5 || true
+          python3 - <<'PY'
+          import re, html
+          s = open('page.html', encoding='utf-8', errors='ignore').read()
+          s = re.sub(r'<script.*?</script>|<style.*?</style>', '', s, flags=re.S)
+          t = html.unescape(re.sub(r'<[^>]+>', '\n', s))
+          t = '\n'.join(l.strip() for l in t.splitlines() if l.strip())
+          print(t[:4000])
+          PY
+      - name: Landing prototypes
+        run: |
+          for u in https://mikeproduct14.github.io/test-projects/stm-chemistry-landing/ https://mikeproduct14.github.io/test-projects/chess-coach/; do
+            curl -sS -m 25 -L -o /dev/null -w "$u -> %{http_code}\n" "$u" || true
+          done

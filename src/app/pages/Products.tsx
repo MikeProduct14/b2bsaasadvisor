@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import { useModal } from "../context/ModalContext";
 import { products, statusLabel, type Product, type ProductStatus } from "../products";
 
@@ -24,6 +25,18 @@ const bodyStyle = {
   fontSize: "15px",
   color: "#3a3a3a",
   lineHeight: "1.6",
+};
+
+const linkButtonStyle = {
+  fontFamily: "'Inter', sans-serif",
+  fontWeight: 600,
+  fontSize: "13px",
+  letterSpacing: "0.04em",
+  textTransform: "uppercase" as const,
+  color: "#0F2356",
+  textDecoration: "none",
+  border: "1px solid #0F2356",
+  padding: "12px 24px",
 };
 
 export function StatusBadge({ status }: { status: ProductStatus }) {
@@ -145,27 +158,22 @@ function ProductCard({ product }: { product: Product }) {
           ))}
         </div>
 
-        {product.link && (
-          <a
-            href={product.link.href}
-            target="_blank"
-            rel="noopener"
-            className="inline-block mt-8"
-            style={{
-              fontFamily: "'Inter', sans-serif",
-              fontWeight: 600,
-              fontSize: "13px",
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-              color: "#0F2356",
-              textDecoration: "none",
-              border: "1px solid #0F2356",
-              padding: "12px 24px",
-            }}
-          >
-            {product.link.label} ↗
-          </a>
-        )}
+        {product.link &&
+          (product.link.href.startsWith("/") ? (
+            <Link to={product.link.href} className="inline-block mt-8" style={linkButtonStyle}>
+              {product.link.label} →
+            </Link>
+          ) : (
+            <a
+              href={product.link.href}
+              target="_blank"
+              rel="noopener"
+              className="inline-block mt-8"
+              style={linkButtonStyle}
+            >
+              {product.link.label} ↗
+            </a>
+          ))}
       </div>
     </article>
   );

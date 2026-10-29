@@ -1,6 +1,8 @@
 import { MAP_CHECKED_AT, MAP_GUIDE_SLUG, mapSources } from "./aiPlatformMap";
 import { getPost, posts, postPath } from "./blog/posts";
 import { products } from "./products";
+import { faq as fintechFaq, sources as fintechSources } from "./fintech/content";
+import { PUBLISHED, SNAPSHOT, allSegments, byScore, score, verdict } from "./fintech/model";
 import { AUTHOR, SITE_NAME, SITE_URL } from "./site";
 
 export interface Head {
@@ -188,6 +190,59 @@ export function getHead(pathname: string): Head {
         breadcrumbs([
           { name: "Главная", path: "/" },
           { name: "Продукты", path: "/products/" },
+        ]),
+      ],
+    };
+  }
+
+  if (path === "/fintech-map/") {
+    const open = byScore(allSegments).filter((n) => verdict(score(n)) === "open");
+    return {
+      title: withBrand("Карта рынка финтеха России и СНГ 2026"),
+      description: `${allSegments.length} сегментов финтеха России и СНГ с оценкой перегрева, барьера входа и денег. Где в 2026 году есть окно для нового игрока без банковской лицензии.`,
+      path,
+      type: "article",
+      jsonLd: [
+        {
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: "Карта рынка финтеха России и СНГ",
+          description: `${allSegments.length} сегментов в пяти доменах: банки, приём платежей, агрегаторы финуслуг, сервисы для самозанятых и KYC/AML. Оценки перегрева, барьера входа, денег и регуляторного ветра.`,
+          datePublished: PUBLISHED,
+          dateModified: SNAPSHOT,
+          inLanguage: "ru-RU",
+          about: ["финтех", "рынок финтеха России", "KYC/AML", "платёжные сервисы", "регулирование финансового рынка"],
+          spatialCoverage: ["Россия", "Казахстан", "Узбекистан", "Армения", "Кыргызстан"],
+          mainEntityOfPage: `${SITE_URL}${path}`,
+          author: person,
+          publisher: { "@type": "Organization", name: SITE_NAME, url: `${SITE_URL}/` },
+          citation: fintechSources.map((source) => source.url),
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "Открытые окна для входа в финтех",
+          itemListElement: open.map((n, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            name: n.n,
+            description: n.entry,
+            url: `${SITE_URL}${path}#${n.id}`,
+          })),
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: fintechFaq.map((item) => ({
+            "@type": "Question",
+            name: item.q,
+            acceptedAnswer: { "@type": "Answer", text: item.a },
+          })),
+        },
+        breadcrumbs([
+          { name: "Главная", path: "/" },
+          { name: "Продукты", path: "/products/" },
+          { name: "Карта рынка финтеха", path },
         ]),
       ],
     };

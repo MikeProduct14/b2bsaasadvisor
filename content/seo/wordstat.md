@@ -8,8 +8,9 @@ Yandex Search API (AI Studio). Старый API Вордстата (`api.wordsta
 
 1. Войдите в [Yandex AI Studio](https://aistudio.yandex.ru/) и в [консоли Yandex Cloud](https://console.yandex.cloud/)
    откройте каталог (folder). Его ID — в адресе страницы и в карточке каталога, вида `b1g...`.
-2. В этом каталоге создайте сервисный аккаунт и API-ключ к нему для Search API. Если скрипт получит
-   ответ 403, выдайте сервисному аккаунту роль на Search API в этом каталоге.
+2. В этом каталоге создайте сервисный аккаунт с ролью `search-api.webSearch.user` и API-ключ к нему
+   с областью действия `yc.search-api.execute`. Ключ показывается один раз, при создании.
+   Client ID и Client Secret от старого API Вордстата (OAuth-приложение) не нужны.
 3. В репозитории: Settings → Secrets and variables → Actions → New repository secret:
    - `YANDEX_SEARCH_API_KEY` — API-ключ;
    - `YANDEX_FOLDER_ID` — ID каталога.

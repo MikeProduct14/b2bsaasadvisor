@@ -47,8 +47,7 @@
   outline: 2px solid var(--fm-navy);
   outline-offset: 2px;
 }
-.fm code,
-section code {
+.fm-code {
   font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
   font-size: 0.9em;
   background: var(--fm-navy-tint, #f3f5fa);

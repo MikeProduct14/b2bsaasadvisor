@@ -8,6 +8,7 @@ import { routes } from "./app/routes";
 import { postPath, posts } from "./app/blog/posts";
 import { getHead, renderHead } from "./app/seo";
 import { AUTHOR, SITE_NAME, SITE_URL } from "./app/site";
+import { SNAPSHOT } from "./app/fintech/model";
 
 // Build-time entry: scripts/prerender.mjs turns every path below into static HTML,
 // so search engines and AI crawlers get the full page without running JavaScript.
@@ -19,9 +20,13 @@ export const staticPaths = [
   "/philosophy/",
   "/scale/",
   "/products/",
+  "/fintech-map/",
   "/blog/",
   ...posts.map((post) => postPath(post.slug)),
 ];
+
+// Pages whose content has its own update date, for <lastmod> in sitemap.xml.
+export const pageLastmod: Record<string, string> = { "/fintech-map/": SNAPSHOT };
 
 export async function render(url: string) {
   const handler = createStaticHandler(routes);

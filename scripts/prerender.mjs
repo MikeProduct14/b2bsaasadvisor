@@ -11,7 +11,7 @@ const root = process.cwd();
 const dist = path.join(root, "dist");
 const ssrDir = path.join(root, "dist-ssr");
 
-const { render, staticPaths, posts, SITE_URL, SITE_NAME } = await import(
+const { render, staticPaths, pageLastmod, posts, SITE_URL, SITE_NAME } = await import(
   pathToFileURL(path.join(ssrDir, "entry-server.js")).href
 );
 
@@ -51,17 +51,15 @@ await write(
 
 const postDate = (post) => post.updated ?? post.date;
 
-// Static pages copied from public/ as is (not React routes), listed for search engines.
-const extraPaths = ["/fintech-map/"];
-
 await write(
   "sitemap.xml",
   `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...staticPaths, ...extraPaths]
+${staticPaths
   .map((url) => {
     const post = posts.find((p) => url === `/blog/${p.slug}/`);
-    const lastmod = post ? `<lastmod>${postDate(post)}</lastmod>` : "";
+    const date = post ? postDate(post) : pageLastmod[url];
+    const lastmod = date ? `<lastmod>${date}</lastmod>` : "";
     return `  <url><loc>${SITE_URL}${url}</loc>${lastmod}</url>`;
   })
   .join("\n")}
@@ -118,7 +116,7 @@ await write(
 - [Подход](${SITE_URL}/philosophy/): принципы работы
 - [Опыт](${SITE_URL}/scale/): масштаб проектов и команд
 - [Продукты](${SITE_URL}/products/): собственные продукты и MVP автора с текущим статусом
-- [Карта финтеха РФ и СНГ](${SITE_URL}/fintech-map/): 57 сегментов рынка с оценками перегрева, барьера входа и денег, срез 19.10.2026
+- [Карта рынка финтеха России и СНГ](${SITE_URL}/fintech-map/): 57 сегментов с оценками перегрева, барьера входа и денег, где в 2026 году есть окно для входа, календарь регуляторики 2026–2028; срез 29.10.2026
 
 ## Блог
 

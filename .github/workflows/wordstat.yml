@@ -1,7 +1,8 @@
 name: Wordstat frequency
 
 # Заполняет wordstat_month в content/seo/keywords.csv и открывает PR.
-# Раз в месяц обновляет частотность у всех ключей, при ручном запуске — по выбору.
+# Раз в месяц ещё и обновляет частотность старше 25 дней. Яндекс пускает 100 запросов в час,
+# поэтому за запуск обрабатывается до 90 ключей, остальные — в следующий раз.
 # Нужны секреты YANDEX_SEARCH_API_KEY и YANDEX_FOLDER_ID: content/seo/wordstat.md.
 on:
   schedule:
@@ -9,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       refresh_all:
-        description: "Обновить частотность у всех ключей (иначе только у пустых)"
+        description: "Ещё и обновить частотность старше 25 дней (иначе только пустые)"
         type: boolean
         default: false
 
@@ -45,7 +46,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if git diff --quiet -- content/seo/keywords.csv; then
+          if git diff --quiet -- content/seo/keywords.csv content/seo/wordstat-checked.json; then
             echo "Частотность не изменилась"
             exit 0
           fi
@@ -53,7 +54,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-          git add content/seo/keywords.csv
+          git add content/seo/keywords.csv content/seo/wordstat-checked.json
           git commit -m "Частотность ключей из Вордстата"
           git push -u origin "$branch"
           if ! gh pr create --base main --head "$branch" --title "Частотность ключей из Вордстата" \

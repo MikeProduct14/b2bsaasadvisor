@@ -13,14 +13,13 @@ jobs:
             echo "===== $1"
             body="$(curl -sSL --max-time 30 -A "Mozilla/5.0" "$1" || true)"
             if printf '%s' "$body" | head -c 200 | grep -qi '<!doctype html\|<html'; then
-              printf '%s' "$body" | python3 -c "import sys,re,html; t=sys.stdin.read(); t=re.sub(r'(?s)<(script|style)[^>]*>.*?</\1>',' ',t); t=re.sub(r'<[^>]+>','\n',t); t=html.unescape(t); t=re.sub(r'\n\s*\n+','\n',t); print(t[:20000])"
+              printf '%s' "$body" | python3 -c "import sys,re,html; t=sys.stdin.read(); t=re.sub(r'(?s)<(script|style)[^>]*>.*?</\1>',' ',t); t=re.sub(r'<[^>]+>','\n',t); t=html.unescape(t); t=re.sub(r'\n\s*\n+','\n',t); print(t[:45000])"
             else
               printf '%s' "$body" | head -c 30000
             fi
             echo
           }
-          for p in concepts/wordstat operations/wordstat-gettop api-ref/Wordstat/getTop pricing concepts/limits; do
-            get "https://yandex.cloud/ru/docs/search-api/$p.md"
-          done
-          get "https://aistudio.yandex.ru/docs/ru/search-api/concepts/wordstat.html"
-          get "https://aistudio.yandex.ru/docs/ru/search-api/pricing.html"
+          get "https://habr.com/ru/articles/1030276/"
+          get "https://osipenkov.ru/api-wordstat/"
+          get "https://yandex.cloud/ru/docs/search-api/api-ref/Wordstat/getTop"
+          get "https://yandex.cloud/ru/docs/search-api/pricing"

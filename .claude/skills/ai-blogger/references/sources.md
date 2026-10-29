@@ -11,7 +11,9 @@
 - **Модели и цены:** официальные страницы тарифов Yandex AI Studio / Yandex Cloud, GigaChat API, а для обзора
   мирового рынка — anthropic.com/news, openai.com/news, blog.google, ai.meta.com, mistral.ai/news.
 - **Государство и законы:** consultant.ru, garant.ru, pravo.gov.ru (тексты законов), digital.gov.ru (Минцифры),
-  rkn.gov.ru (персональные данные), cbr.ru (финтех и банки), government.ru, rosstat.gov.ru.
+  rkn.gov.ru (персональные данные), cbr.ru (финтех и банки), fedsfm.ru (Росфинмониторинг, 115-ФЗ),
+  nalog.gov.ru (налоги и самозанятые), economy.gov.ru (Минэкономразвития, платформенная экономика),
+  government.ru, rosstat.gov.ru.
 - **Исследования с методологией:** НИУ ВШЭ (issek.hse.ru), Аналитический центр при Правительстве (ac.gov.ru),
   Альянс в сфере ИИ (a-ai.ru, библиотека кейсов), ПСБ и «Опора России» (индекс RSBI), НАФИ, Stanford AI Index,
   McKinsey State of AI, OECD.

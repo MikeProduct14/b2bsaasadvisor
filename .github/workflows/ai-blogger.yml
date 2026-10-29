@@ -41,6 +41,10 @@ jobs:
 
       - name: Write post
         uses: anthropics/claude-code-action@v1
+        env:
+          # Частотность из Вордстата для scripts/wordstat.mjs; без секретов блогер считает спрос гипотезой.
+          YANDEX_SEARCH_API_KEY: ${{ secrets.YANDEX_SEARCH_API_KEY }}
+          YANDEX_FOLDER_ID: ${{ secrets.YANDEX_FOLDER_ID }}
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -49,7 +53,8 @@ jobs:
             уже склонирован в текущую папку, зависимости установлены (`npm ci`). Сегодня запуск в GitHub Actions:
             вопросов задавать некому, решения принимай сам по инструкциям скилла.
 
-            Тема от владельца (если пусто — выбери сам по семантике и аудитории): "${{ inputs.topic }}"
+            Тема от владельца (если пусто — возьми первую тему «в очереди» из раздела «Очередь публикации»
+            в `content/seo/backlog.md`, а если очередь пуста — выбери сам по семантике и аудитории): "${{ inputs.topic }}"
 
             1. Прочитай `.claude/skills/ai-blogger/SKILL.md` и выполни его в режиме планового запуска:
                одна статья. Читай файлы, на которые он ссылается (`references/`, `.claude/product-marketing.md`,
@@ -71,7 +76,7 @@ jobs:
                в итоговом сообщении перечисли проверенные темы и причины отказа.
           claude_args: |
             --max-turns 200
-            --allowedTools "Read,Write,Edit,Glob,Grep,WebSearch,WebFetch,Task,Bash(git:*),Bash(npm run build),Bash(npm ci),Bash(ls:*),Bash(date:*),Bash(mkdir:*),Bash(wc:*)"
+            --allowedTools "Read,Write,Edit,Glob,Grep,WebSearch,WebFetch,Task,Bash(git:*),Bash(npm run build),Bash(npm ci),Bash(node scripts/wordstat.mjs:*),Bash(ls:*),Bash(date:*),Bash(mkdir:*),Bash(wc:*)"
 
       - name: Open pull request
         if: ${{ !cancelled() && hashFiles('.blog-pr/branch.txt') != '' }}

@@ -51,11 +51,14 @@ await write(
 
 const postDate = (post) => post.updated ?? post.date;
 
+// Static pages copied from public/ as is (not React routes), listed for search engines.
+const extraPaths = ["/fintech-map/"];
+
 await write(
   "sitemap.xml",
   `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${staticPaths
+${[...staticPaths, ...extraPaths]
   .map((url) => {
     const post = posts.find((p) => url === `/blog/${p.slug}/`);
     const lastmod = post ? `<lastmod>${postDate(post)}</lastmod>` : "";
@@ -115,6 +118,7 @@ await write(
 - [Подход](${SITE_URL}/philosophy/): принципы работы
 - [Опыт](${SITE_URL}/scale/): масштаб проектов и команд
 - [Продукты](${SITE_URL}/products/): собственные продукты и MVP автора с текущим статусом
+- [Карта финтеха РФ и СНГ](${SITE_URL}/fintech-map/): 57 сегментов рынка с оценками перегрева, барьера входа и денег, срез 19.10.2026
 
 ## Блог
 

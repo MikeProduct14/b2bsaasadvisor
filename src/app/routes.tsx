@@ -4,6 +4,7 @@ import { Home } from "./pages/Home";
 import { ProductPhilosophy } from "./pages/ProductPhilosophy";
 import { ManagementScale } from "./pages/ManagementScale";
 import { Products } from "./pages/Products";
+import { AiPlatformMap } from "./pages/AiPlatformMap";
 import { Blog } from "./pages/Blog";
 import { BlogPost, blogPostLoader } from "./pages/BlogPost";
 import AdminLeads from "./pages/AdminLeads";
@@ -18,6 +19,7 @@ export const routes: RouteObject[] = [
       { path: "philosophy", Component: ProductPhilosophy },
       { path: "scale", Component: ManagementScale },
       { path: "products", Component: Products },
+      { path: "ai-platform-map", Component: AiPlatformMap },
       { path: "blog", Component: Blog },
       {
         path: "blog/:slug",

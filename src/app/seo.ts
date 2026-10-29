@@ -1,3 +1,4 @@
+import { MAP_CHECKED_AT, MAP_GUIDE_SLUG, mapSources } from "./aiPlatformMap";
 import { getPost, posts, postPath } from "./blog/posts";
 import { products } from "./products";
 import { AUTHOR, SITE_NAME, SITE_URL } from "./site";
@@ -187,6 +188,38 @@ export function getHead(pathname: string): Head {
         breadcrumbs([
           { name: "Главная", path: "/" },
           { name: "Продукты", path: "/products/" },
+        ]),
+      ],
+    };
+  }
+
+  if (path === "/ai-platform-map/") {
+    const title = "Карта корпоративной AI-платформы";
+    const description =
+      "Интерактивная карта: слои корпоративной AI-платформы, open-source и российские инструменты, цены, 152-ФЗ, риски и план внедрения для компании от 100 человек.";
+    return {
+      title: withBrand(title),
+      description,
+      path,
+      type: "website",
+      jsonLd: [
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: title,
+          description,
+          url: `${SITE_URL}${path}`,
+          inLanguage: "ru-RU",
+          dateModified: MAP_CHECKED_AT,
+          author: person,
+          citation: Object.values(mapSources)
+            .map((source) => source.url)
+            .filter(Boolean),
+        },
+        breadcrumbs([
+          { name: "Главная", path: "/" },
+          { name: "Гайд по AI-платформе", path: postPath(MAP_GUIDE_SLUG) },
+          { name: title, path },
         ]),
       ],
     };

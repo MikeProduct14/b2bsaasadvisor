@@ -19,6 +19,7 @@ export const staticPaths = [
   "/philosophy/",
   "/scale/",
   "/products/",
+  "/ai-platform-map/",
   "/blog/",
   ...posts.map((post) => postPath(post.slug)),
 ];

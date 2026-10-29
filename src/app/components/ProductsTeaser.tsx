@@ -65,7 +65,7 @@ export function ProductsTeaser() {
         </div>
 
         <div className="grid grid-cols-12 gap-6">
-          {products.map((product) => (
+          {products.slice(0, 6).map((product) => (
             <Link
               key={product.slug}
               to={`/products/#${product.slug}`}

@@ -49,7 +49,7 @@ export function Hero() {
             <div className="flex flex-wrap gap-x-12 gap-y-6 mb-14">
               {[
                 { value: "11+", label: "лет в продукте" },
-                { value: "−70%", label: "ручной обработки заявок" },
+                { value: "−20%", label: "фрода после автоматизации проверок" },
                 { value: "500", label: "подключений в сутки" },
                 { value: "6 ч", label: "онбординг вместо 5 дней" },
               ].map((stat) => (

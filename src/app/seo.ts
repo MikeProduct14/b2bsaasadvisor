@@ -168,7 +168,7 @@ export function getHead(pathname: string): Head {
     return {
       title: withBrand("Продукты: что я собрал сам"),
       description:
-        "Каталог моделей и SEO-воронки для MoleculAI, MVP по 115-ФЗ для МФО, курс по A/B-тестам, Luno и Roadmap App — с честным статусом каждого.",
+        "Каталог моделей и SEO-воронки для MoleculAI, воронка приложения Harvest Map, MVP по 115-ФЗ для МФО, курс по A/B-тестам, Luno, Roadmap App и лендинги — с честным статусом каждого.",
       path,
       type: "website",
       jsonLd: [

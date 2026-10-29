@@ -3,8 +3,10 @@ import { products, statusLabel, type Product, type ProductStatus } from "../prod
 
 const statusColors: Record<ProductStatus, { color: string; background: string }> = {
   live: { color: "#14532d", background: "#e8f5ec" },
+  shipped: { color: "#14532d", background: "#e8f5ec" },
   hypothesis: { color: "#7c4a03", background: "#fdf3e1" },
   "in-progress": { color: "#0F2356", background: "#f3f5fa" },
+  prototype: { color: "#3a3a3a", background: "#f0f0f0" },
 };
 
 const labelStyle = {

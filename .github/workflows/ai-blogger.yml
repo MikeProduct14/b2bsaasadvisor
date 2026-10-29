@@ -1,0 +1,98 @@
+name: AI blogger
+
+# Пн и Чт в 11:40 по Москве (cron в GitHub — по UTC) + ручной запуск:
+# Actions → AI blogger → Run workflow.
+on:
+  schedule:
+    - cron: "40 8 * * 1,4"
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "Тема или главный ключ (необязательно — иначе блогер выберет сам)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ai-blogger
+  cancel-in-progress: false
+
+jobs:
+  write-post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write post
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            Плановый запуск ИИ-блогера сайта www.productmike.ru. Репозиторий ${{ github.repository }}
+            уже склонирован в текущую папку, зависимости установлены (`npm ci`). Сегодня запуск в GitHub Actions:
+            вопросов задавать некому, решения принимай сам по инструкциям скилла.
+
+            Тема от владельца (если пусто — выбери сам по семантике и аудитории): "${{ inputs.topic }}"
+
+            1. Прочитай `.claude/skills/ai-blogger/SKILL.md` и выполни его в режиме планового запуска:
+               одна статья. Читай файлы, на которые он ссылается (`references/`, `.claude/product-marketing.md`,
+               `content/seo/`, опубликованные статьи), и скиллы `copy-editing` и `humanizer` в `.claude/skills/`.
+            2. Занятые темы: статьи в `content/blog/` и ветки `origin/blog/*`
+               (`git branch -r --list 'origin/blog/*'`, файлы — через `git show`). Не бери их главные ключи.
+            3. Страницы источников открывай через WebFetch: здесь есть доступ в интернет, поэтому фактчек
+               должен быть полным — сниппетов поиска недостаточно.
+            4. Создай ветку `blog/<slug>` от `origin/main`, закоммить статью и обновлённые
+               `content/seo/keywords.csv` и `content/seo/backlog.md`. Код сайта не меняй.
+               `npm run build` должен пройти до коммита. Запушь ветку: `git push -u origin blog/<slug>`.
+            5. PR открывает следующий шаг workflow, команду `gh` не используй. Вместо этого создай файлы
+               (не коммить их, папка в .gitignore):
+               - `.blog-pr/branch.txt` — имя ветки, одна строка;
+               - `.blog-pr/title.txt` — заголовок PR, одна строка, например «Блог: <заголовок статьи>»;
+               - `.blog-pr/body.md` — описание PR по шагу 9 скилла: бриф, оценка темы, таблица фактчека
+                 с цитатами со страниц, ключи для проверки в Вордстате, вопросы к владельцу.
+            6. Если ни одна тема не прошла порог качества, ничего не пушь и не создавай `.blog-pr/`:
+               в итоговом сообщении перечисли проверенные темы и причины отказа.
+          claude_args: |
+            --max-turns 200
+            --allowedTools "Read,Write,Edit,Glob,Grep,WebSearch,WebFetch,Task,Bash(git:*),Bash(npm run build),Bash(npm ci),Bash(ls:*),Bash(date:*),Bash(mkdir:*),Bash(wc:*)"
+
+      - name: Open pull request
+        if: ${{ !cancelled() && hashFiles('.blog-pr/branch.txt') != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          branch="$(head -n1 .blog-pr/branch.txt | tr -d '[:space:]')"
+          title="$(head -n1 .blog-pr/title.txt)"
+          if ! git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
+            echo "::error::Ветка $branch не запушена"
+            exit 1
+          fi
+          if gh pr view "$branch" --json url --jq .url 2> /dev/null; then
+            echo "PR для $branch уже открыт"
+            exit 0
+          fi
+          if url="$(gh pr create --base main --head "$branch" --title "$title" --body-file .blog-pr/body.md)"; then
+            echo "### Статья готова: [$title]($url)" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          # GitHub может запрещать Actions создавать PR (Settings → Actions → General → Workflow permissions).
+          compare="https://github.com/${GITHUB_REPOSITORY}/compare/main...${branch}?expand=1"
+          echo "::warning::PR не создан автоматически. Откройте его вручную: $compare"
+          echo "### Статья готова, откройте PR вручную: [$branch]($compare)" >> "$GITHUB_STEP_SUMMARY"

@@ -5,6 +5,9 @@ node_modules/
 dist/
 dist-ssr/
 
+# AI blogger: PR title and body handed to the workflow
+.blog-pr/
+
 # Environment variables
 .env
 .env.local

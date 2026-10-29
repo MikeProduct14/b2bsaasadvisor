@@ -95,4 +95,12 @@ jobs:
           # GitHub может запрещать Actions создавать PR (Settings → Actions → General → Workflow permissions).
           compare="https://github.com/${GITHUB_REPOSITORY}/compare/main...${branch}?expand=1"
           echo "::warning::PR не создан автоматически. Откройте его вручную: $compare"
-          echo "### Статья готова, откройте PR вручную: [$branch]($compare)" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "### Статья готова, откройте PR вручную: [$branch]($compare)"
+            echo
+            echo "Заголовок: $title"
+            echo
+            echo "Описание PR от блогера:"
+            echo
+            cat .blog-pr/body.md
+          } >> "$GITHUB_STEP_SUMMARY"

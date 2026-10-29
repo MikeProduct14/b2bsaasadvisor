@@ -41,6 +41,10 @@ jobs:
 
       - name: Write post
         uses: anthropics/claude-code-action@v1
+        env:
+          # Частотность из Вордстата для scripts/wordstat.mjs; без секретов блогер считает спрос гипотезой.
+          YANDEX_SEARCH_API_KEY: ${{ secrets.YANDEX_SEARCH_API_KEY }}
+          YANDEX_FOLDER_ID: ${{ secrets.YANDEX_FOLDER_ID }}
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -72,7 +76,7 @@ jobs:
                в итоговом сообщении перечисли проверенные темы и причины отказа.
           claude_args: |
             --max-turns 200
-            --allowedTools "Read,Write,Edit,Glob,Grep,WebSearch,WebFetch,Task,Bash(git:*),Bash(npm run build),Bash(npm ci),Bash(ls:*),Bash(date:*),Bash(mkdir:*),Bash(wc:*)"
+            --allowedTools "Read,Write,Edit,Glob,Grep,WebSearch,WebFetch,Task,Bash(git:*),Bash(npm run build),Bash(npm ci),Bash(node scripts/wordstat.mjs:*),Bash(ls:*),Bash(date:*),Bash(mkdir:*),Bash(wc:*)"
 
       - name: Open pull request
         if: ${{ !cancelled() && hashFiles('.blog-pr/branch.txt') != '' }}

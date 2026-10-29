@@ -1,0 +1,62 @@
+name: Wordstat frequency
+
+# Заполняет wordstat_month в content/seo/keywords.csv и открывает PR.
+# Раз в месяц обновляет частотность у всех ключей, при ручном запуске — по выбору.
+# Нужны секреты YANDEX_SEARCH_API_KEY и YANDEX_FOLDER_ID: content/seo/wordstat.md.
+on:
+  schedule:
+    - cron: "17 6 2 * *"
+  workflow_dispatch:
+    inputs:
+      refresh_all:
+        description: "Обновить частотность у всех ключей (иначе только у пустых)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  frequency:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Collect frequency
+        env:
+          YANDEX_SEARCH_API_KEY: ${{ secrets.YANDEX_SEARCH_API_KEY }}
+          YANDEX_FOLDER_ID: ${{ secrets.YANDEX_FOLDER_ID }}
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.refresh_all }}" = "true" ]; then
+            node scripts/wordstat.mjs --all
+          else
+            node scripts/wordstat.mjs
+          fi
+
+      - name: Open pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git diff --quiet -- content/seo/keywords.csv; then
+            echo "Частотность не изменилась"
+            exit 0
+          fi
+          branch="seo/wordstat-$(date -u +%Y-%m-%d)-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add content/seo/keywords.csv
+          git commit -m "Частотность ключей из Вордстата"
+          git push -u origin "$branch"
+          if ! gh pr create --base main --head "$branch" --title "Частотность ключей из Вордстата" \
+            --body "Колонка wordstat_month в content/seo/keywords.csv: запросы за последние 30 дней из Wordstat API (Yandex Search API)."; then
+            echo "::warning::PR не создан автоматически. Откройте его вручную: https://github.com/${GITHUB_REPOSITORY}/compare/main...${branch}?expand=1"
+          fi

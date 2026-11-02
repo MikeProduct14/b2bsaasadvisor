@@ -1,0 +1,9 @@
+# Нужен только для `supabase functions deploy` (.github/workflows/supabase-functions.yml).
+# Функция заявок исторически называется make-server-52ecca80 (адрес в ContactModal.tsx),
+# а код лежит в папке server — связываем их через entrypoint.
+project_id = "b2bsaasadvisor"
+
+[functions.make-server-52ecca80]
+entrypoint = "./functions/server/index.tsx"
+# Сайт шлёт публичный anon-ключ в заголовке Authorization — проверка JWT его пропускает.
+verify_jwt = true

@@ -8,6 +8,8 @@ interface FormData {
   telegram: string;
   phone: string;
   context: string;
+  // Ловушка для спам-ботов: скрыта от людей, сервер отбрасывает заявки с заполненным полем.
+  website: string;
 }
 
 async function submitLead(data: FormData): Promise<void> {
@@ -19,7 +21,7 @@ async function submitLead(data: FormData): Promise<void> {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${publicAnonKey}`,
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ ...data, page: window.location.pathname }),
     }
   );
 
@@ -277,6 +279,15 @@ export function ContactModal() {
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} noValidate>
+              <div
+                aria-hidden="true"
+                style={{ position: "absolute", left: "-10000px", width: "1px", height: "1px", overflow: "hidden" }}
+              >
+                <label>
+                  Сайт
+                  <input {...register("website")} type="text" tabIndex={-1} autoComplete="off" />
+                </label>
+              </div>
               <div className="flex flex-col gap-6">
                 {/* Name */}
                 <div>

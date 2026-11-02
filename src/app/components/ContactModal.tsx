@@ -8,8 +8,9 @@ interface FormData {
   telegram: string;
   phone: string;
   context: string;
-  // Ловушка для спам-ботов: скрыта от людей, сервер отбрасывает заявки с заполненным полем.
-  website: string;
+  // Ловушка для спам-ботов: скрыта от людей. Заявку с заполненным полем сервер всё равно
+  // сохраняет и присылает, но с пометкой «возможно спам».
+  leave_empty: string;
 }
 
 async function submitLead(data: FormData): Promise<void> {
@@ -285,9 +286,20 @@ export function ContactModal() {
                 aria-hidden="true"
                 style={{ position: "absolute", left: "-10000px", width: "1px", height: "1px", overflow: "hidden" }}
               >
+                {/* Нейтральные имя и подпись, чтобы автозаполнение браузера и менеджеры
+                    паролей не узнали поле; data-* выключают 1Password, LastPass и Bitwarden. */}
                 <label>
-                  Сайт
-                  <input {...register("website")} type="text" tabIndex={-1} autoComplete="off" />
+                  Оставьте это поле пустым
+                  <input
+                    {...register("leave_empty")}
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    data-1p-ignore=""
+                    data-lpignore="true"
+                    data-bwignore=""
+                    data-form-type="other"
+                  />
                 </label>
               </div>
               <div className="flex flex-col gap-6">

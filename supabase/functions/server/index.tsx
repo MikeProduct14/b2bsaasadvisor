@@ -46,11 +46,10 @@ app.post("/make-server-52ecca80/leads", async (c) => {
     const body = (await c.req.json()) ?? {};
 
     // Ловушка для спам-ботов: поле скрыто от людей, боты заполняют все поля подряд.
-    // Отвечаем как при успехе, чтобы бот не подбирал обход, но заявку не сохраняем.
-    if (field(body.website, 200)) {
-      console.log("Lead rejected by honeypot");
-      return c.json({ success: true, message: "Lead submitted successfully" });
-    }
+    // Заявку не выбрасываем — его может заполнить и автозаполнение браузера у живого
+    // человека. Сохраняем и присылаем с пометкой «возможно спам».
+    // `website` — имя поля в первой версии формы (могла остаться в кэше браузера).
+    const suspectedSpam = Boolean(field(body.leave_empty, 200) || field(body.website, 200));
 
     const name = field(body.name, LIMITS.name);
     const telegram = field(body.telegram, LIMITS.telegram);
@@ -78,11 +77,12 @@ app.post("/make-server-52ecca80/leads", async (c) => {
       context,
       page,
       submittedAt: new Date().toISOString(),
+      ...(suspectedSpam ? { suspectedSpam: true } : {}),
     };
 
     await kv.set(leadId, leadData);
 
-    console.log(`Lead submission successful: ${leadId}`);
+    console.log(`Lead submission successful: ${leadId}${suspectedSpam ? " (suspected spam)" : ""}`);
 
     // Заявка уже сохранена: сбой Telegram только пишется в лог.
     await sendToOwner(formatLeadMessage(leadData));

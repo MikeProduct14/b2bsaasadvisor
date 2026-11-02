@@ -10,6 +10,7 @@ export interface LeadNotice {
   context: string;
   page: string;
   submittedAt: string;
+  suspectedSpam?: boolean;
 }
 
 // Telegram режет сообщения длиннее 4096 символов; оставляем запас на подписи полей.
@@ -54,6 +55,9 @@ export function formatLeadMessage(lead: LeadNotice): string {
     : context;
 
   const lines = [
+    ...(lead.suspectedSpam
+      ? ["⚠️ <b>Возможно спам:</b> заполнено скрытое поле-ловушка. Если заявка живая — его заполнило автозаполнение браузера.", ""]
+      : []),
     "<b>Новая заявка с сайта</b>",
     "",
     `<b>Имя:</b> ${escapeHtml(lead.name.trim())}`,

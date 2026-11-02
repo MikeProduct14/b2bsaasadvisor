@@ -1,0 +1,71 @@
+name: Leads healthcheck
+
+# Раз в день проверяет, что функция заявок в Supabase отвечает и видит базу.
+# Если нет — пишет владельцу в Telegram: форма на сайте в этот момент заявки не принимает.
+# Заодно запрос к базе не даёт бесплатному проекту Supabase уйти на паузу
+# (Supabase ставит на паузу проекты без запросов в течение недели).
+on:
+  schedule:
+    - cron: "17 6 * * *" # 09:17 по Москве
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ping lead function
+        id: ping
+        run: |
+          # Адрес проекта и публичный anon-ключ — те же, что у формы на сайте.
+          ref=$(grep -o 'projectId = "[^"]*"' utils/supabase/info.tsx | cut -d'"' -f2)
+          key=$(grep -o 'publicAnonKey = "[^"]*"' utils/supabase/info.tsx | cut -d'"' -f2)
+          url="https://${ref}.supabase.co/functions/v1/make-server-52ecca80/health"
+          status=000
+          # Три попытки: первая может упасть на холодном старте функции.
+          for attempt in 1 2 3; do
+            status=$(curl -sS -o body.txt -w '%{http_code}' --max-time 30 \
+              -H "Authorization: Bearer ${key}" "$url" || true)
+            if [ "$status" = "200" ] && grep -q '"ok"' body.txt; then
+              echo "Функция заявок работает."
+              exit 0
+            fi
+            echo "Попытка ${attempt}: HTTP ${status} $(head -c 300 body.txt 2>/dev/null)"
+            sleep 20
+          done
+          echo "status=${status}" >> "$GITHUB_OUTPUT"
+          echo "detail=$(head -c 300 body.txt 2>/dev/null | tr -d '\r\n')" >> "$GITHUB_OUTPUT"
+          echo "::error::Функция заявок не отвечает (HTTP ${status}). Проверьте проект в Supabase: не на паузе ли он."
+          exit 1
+
+      - name: Alert in Telegram
+        if: failure() && steps.ping.outcome == 'failure'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          STATUS: ${{ steps.ping.outputs.status }}
+          DETAIL: ${{ steps.ping.outputs.detail }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "::warning::Нет секретов Telegram — оповещение не отправлено."
+            exit 0
+          fi
+          text="⚠️ Форма заявок на www.productmike.ru не работает: сервер ответил HTTP ${STATUS}.
+          Заявки сейчас не сохраняются и не приходят сюда.
+
+          Если проект Supabase на паузе — нажмите Restore project:
+          https://supabase.com/dashboard/project/bxokwgejreqeraxlhwqd
+
+          Ответ сервера: ${DETAIL}
+          Проверка: ${RUN_URL}"
+          curl -sS -o /dev/null -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${text}" \
+            --data-urlencode "link_preview_options={\"is_disabled\":true}"

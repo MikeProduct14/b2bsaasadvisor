@@ -20,9 +20,17 @@ app.use(
   }),
 );
 
-// Health check endpoint
-app.get("/make-server-52ecca80/health", (c) => {
-  return c.json({ status: "ok" });
+// Health check endpoint. Читает базу, а не только отвечает «ok»: ежедневная проверка
+// (.github/workflows/leads-healthcheck.yml) так замечает сбой базы и не даёт бесплатному
+// проекту Supabase уйти на паузу из-за недели без запросов.
+app.get("/make-server-52ecca80/health", async (c) => {
+  try {
+    await kv.get("healthcheck");
+    return c.json({ status: "ok" });
+  } catch (error) {
+    console.log(`Health check failed: ${error instanceof Error ? error.message : error}`);
+    return c.json({ status: "error" }, 500);
+  }
 });
 
 // Предельные длины полей формы: защищают базу и сообщение в Telegram от мусора.

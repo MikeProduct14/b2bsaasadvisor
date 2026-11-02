@@ -26,8 +26,9 @@ async function submitLead(data: FormData): Promise<void> {
   );
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to submit lead");
+    // Тело ошибки может быть не JSON (например, когда проект Supabase на паузе).
+    const detail = await response.text().catch(() => "");
+    throw new Error(`Lead submission failed: ${response.status} ${detail.slice(0, 200)}`);
   }
 
   return response.json();
@@ -73,7 +74,8 @@ export function ContactModal() {
       console.log("Lead submitted successfully:", data);
     } catch (error) {
       console.error("Error submitting lead:", error);
-      setSubmitError(error instanceof Error ? error.message : "Ошибка отправки");
+      // Технические подробности — в консоль, посетителю — понятный текст.
+      setSubmitError("Не получилось отправить заявку. Попробуйте ещё раз через пару минут.");
       setIsSubmitting(false);
     }
   }

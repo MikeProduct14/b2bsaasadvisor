@@ -159,7 +159,7 @@ export const products: Product[] = [
     ],
     stack: ["Методология", "Статистика", "Интерактивные уроки"],
     link: {
-      href: "https://ab-praktika-course.spunkygiant7.chatgpt.site/",
+      href: "https://ab.productmike.ru/",
       label: "Открыть курс",
     },
   },

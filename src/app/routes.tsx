@@ -8,7 +8,6 @@ import { FintechMap } from "./pages/FintechMap";
 import { AiPlatformMap } from "./pages/AiPlatformMap";
 import { Blog } from "./pages/Blog";
 import { BlogPost, blogPostLoader } from "./pages/BlogPost";
-import AdminLeads from "./pages/AdminLeads";
 
 // Shared by the browser router (App.tsx) and the build-time prerender (entry-server.tsx).
 export const routes: RouteObject[] = [
@@ -29,7 +28,6 @@ export const routes: RouteObject[] = [
         loader: blogPostLoader,
         HydrateFallback: () => null,
       },
-      { path: "admin/leads", Component: AdminLeads },
     ],
   },
 ];
